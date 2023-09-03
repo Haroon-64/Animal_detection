@@ -9,3 +9,5 @@ https://www.kaggle.com/datasets/alessiocorrado99/animals10
 * trained on ~21k images.
 * ~99.8%
 * untested
+
+** missing application **

@@ -10,4 +10,4 @@ https://www.kaggle.com/datasets/alessiocorrado99/animals10       * one class was
 * ~99.8%
 * untested
 
-**missing application**
+**building qt5 app**

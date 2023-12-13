@@ -2,8 +2,8 @@ import sys
 import numpy as np
 import pandas as pd
 import os
-from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QPushButton, QFileDialog, QGraphicsPixmapItem, QGraphicsScene, QGraphicsView
-from PyQt5.QtGui import QPixmap,QFont 
+from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QPushButton, QFileDialog
+from PyQt5.QtGui import QPixmap 
 from PyQt5.QtCore import Qt 
 import tensorflow as tf
 import tensorflow_hub as hub

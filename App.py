@@ -1,53 +1,95 @@
 import sys
 import numpy as np
 import pandas as pd
-# from matplotlib.pyplot import imread
-#from IPython.display import Image 
-
+import os
+from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QPushButton, QFileDialog, QGraphicsPixmapItem, QGraphicsScene, QGraphicsView
+from PyQt5.QtGui import QPixmap,QFont 
+from PyQt5.QtCore import Qt 
 import tensorflow as tf
 import tensorflow_hub as hub
-from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import QApplication, QMainWindow
-print(tf.config.experimental.list_physical_devices('GPU'))
+
 IMG_SIZE=224
 INPUT_SHAPE = [None,IMG_SIZE,IMG_SIZE,3]
-
+path = ''
+model_path = os.getcwd() + '/saved_models/model.h5'
 # set up data
-data =pd.read_csv('labels.csv')
-total_images  = len(data)
-labels= np.array(data["kind"])
-un_labels= np.unique(labels)
+data = pd.read_csv('labels.csv')
+total_images = len(data)
+labels = np.array(data["kind"])
+un_labels = np.unique(labels)
 mapping = {i : un_labels[i] for i in range(0, len(un_labels))}
-key_map= {un_labels[i] : i for i in range(0, len(un_labels))}
+key_map = {un_labels[i] : i for i in range(0, len(un_labels))}
 num_labels = np.vectorize(mapping.get)(labels)
 OUTPUT_SHAPE = len(un_labels)
 
 # load model
-model = model = tf.keras.models.load_model('/home/haroon/Documents/Animal_detection/saved_models/model.h5',custom_objects={"KerasLayer":hub.KerasLayer})
+model = tf.keras.models.load_model(model_path,custom_objects={"KerasLayer":hub.KerasLayer})
 
 def process_img(Path,size=[IMG_SIZE,IMG_SIZE]):
     """
     convert image at some path to tensor
     """
-    
     img = tf.io.read_file(Path)
     img = tf.image.decode_image(img,channels=3,expand_animations = False)  
     img = tf.image.convert_image_dtype(img,tf.float32)  # scales values [0-1] if necessary
     img = tf.image.resize(img,size)
     return img
 
-# img  = process_img('/home/haroon/Documents/Animal_detection/test_images/1.jpg')
-# preds = model.predict(img, verbose =1)
-# pred_label = np.argmax(preds)     
 
-# create GUI
-def app():
-    
+class ImageClassifierApp(QMainWindow):
+    def __init__(self):
+        super().__init__()
+
+        self.init_ui()
+
+    def init_ui(self):
+        self.setWindowTitle('Image Classifier App')
+        self.setGeometry(100, 100, 800, 600)
+
+        self.central_widget = QLabel()
+        self.central_widget.setAlignment(Qt.AlignCenter)
+        self.setCentralWidget(self.central_widget)
+
+        self.statusBar().showMessage('Ready')
+
+        load_button = QPushButton('Load Image', self)
+        load_button.clicked.connect(self.load_image)
+        load_button.setGeometry(10, 10, 100, 30)
+
+    def load_image(self):
+        options = QFileDialog.Options()
+        options |= QFileDialog.ReadOnly
+        file_dialog = QFileDialog()
+        file_dialog.setOptions(options)
+        file_dialog.setNameFilter("Images (*.png *.jpg *.jpeg *.bmp *.gif)")
+
+        file_dialog.fileSelected.connect(self.process_loaded_image)
+        file_dialog.exec_()
+
+    def process_loaded_image(self, selected_file):
+        if selected_file:
+            img = process_img(selected_file)
+            preds = model.predict(np.expand_dims(img, axis=0), verbose=1)
+            pred_label = np.argmax(preds)
+
+            self.display_image(selected_file, pred_label)
+
+    def display_image(self, image_path, pred_label):
+        img = QPixmap(image_path)
+        img_item = QGraphicsPixmapItem(img)
+        scene = QGraphicsScene(self)
+        scene.addItem(img_item)
+
+        label_text = f"Prediction: {un_labels[pred_label]}"
+        scene.addText(label_text, QFont()).setPos(10, 10)
+
+        view = QGraphicsView(scene)
+        self.setCentralWidget(view)
+        self.statusBar().showMessage(f'Prediction: {un_labels[pred_label]}')
+
+
+if __name__ == '__main__':
     app = QApplication(sys.argv)
-    win = QMainWindow()
-    win.setGeometry(200,200,500,500)  #xpos,ypos,width,height
-    win.setWindowTitle("Animal Detection")
-    win.show()
+    window = ImageClassifierApp()
+    window.show()
     sys.exit(app.exec_())
-    
-app()

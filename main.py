@@ -11,7 +11,7 @@ import tensorflow_hub as hub
 IMG_SIZE=224
 INPUT_SHAPE = [None,IMG_SIZE,IMG_SIZE,3]
 path = ''
-model_path = os.getcwd() + '/saved_models/model.h5'
+model_path = os.getcwd() + '/model.h5'
 # set up data
 data = pd.read_csv('labels.csv')
 total_images = len(data)

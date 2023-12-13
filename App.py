@@ -44,17 +44,19 @@ class ImageClassifierApp(QMainWindow):
 
     def init_ui(self):
         self.setWindowTitle('Image Classifier App')
-        self.setGeometry(100, 100, 800, 600)
+        self.setGeometry(100, 100, 800, 600)  # Set a fixed size for the window
 
-        self.central_widget = QLabel()
+        self.central_widget = QLabel(self)
         self.central_widget.setAlignment(Qt.AlignCenter)
         self.setCentralWidget(self.central_widget)
 
         self.statusBar().showMessage('Ready')
 
-        load_button = QPushButton('Load Image', self)
-        load_button.clicked.connect(self.load_image)
-        load_button.setGeometry(10, 10, 100, 30)
+        self.load_button = QPushButton('Load Image', self)
+        self.load_button.clicked.connect(self.load_image)
+        self.load_button.setGeometry(10, 10, 100, 30)
+
+        self.image_path = None
 
     def load_image(self):
         options = QFileDialog.Options()
@@ -68,24 +70,26 @@ class ImageClassifierApp(QMainWindow):
 
     def process_loaded_image(self, selected_file):
         if selected_file:
-            img = process_img(selected_file)
+            self.image_path = selected_file
+            img = process_img(self.image_path)
             preds = model.predict(np.expand_dims(img, axis=0), verbose=1)
             pred_label = np.argmax(preds)
 
-            self.display_image(selected_file, pred_label)
+            self.display_image(pred_label)
 
-    def display_image(self, image_path, pred_label):
-        img = QPixmap(image_path)
-        img_item = QGraphicsPixmapItem(img)
-        scene = QGraphicsScene(self)
-        scene.addItem(img_item)
+    def display_image(self, pred_label):
+        img = QPixmap(self.image_path)
 
-        label_text = f"Prediction: {un_labels[pred_label]}"
-        scene.addText(label_text, QFont()).setPos(10, 10)
+        # Resize the image to fit within the existing window size
+        img = img.scaled(self.central_widget.size(), Qt.KeepAspectRatio)
 
-        view = QGraphicsView(scene)
-        self.setCentralWidget(view)
-        self.statusBar().showMessage(f'Prediction: {un_labels[pred_label]}')
+        self.central_widget.setPixmap(img)
+
+        label_text = f'Prediction: {un_labels[pred_label]}'
+        self.statusBar().showMessage(label_text)
+
+        # Enable the Load Image button for rechoosing another image
+        self.load_button.setEnabled(True)
 
 
 if __name__ == '__main__':

@@ -9,3 +9,4 @@ https://www.kaggle.com/datasets/alessiocorrado99/animals10       * one class was
 * trained on ~21k images.
 * ~99.8%
 
+* trying to deploy for some platform

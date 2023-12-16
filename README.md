@@ -11,3 +11,4 @@ https://www.kaggle.com/datasets/alessiocorrado99/animals10       * one class was
 
 * to run, extract the zip from releases and run the exe  (No extra dependencies)
 * or use cmd or bash script to run the python script (will install missing dependencies)
+* for android app https://github.com/Haroon-64/Animal_classifier/

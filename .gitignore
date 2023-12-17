@@ -2,3 +2,5 @@
 *.spec
 /dist
 .idea
+data
+logs
